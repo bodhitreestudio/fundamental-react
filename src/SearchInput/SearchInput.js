@@ -127,6 +127,7 @@ class SearchInput extends Component {
             inputProps,
             listProps,
             searchBtnProps,
+            popoverStyle,
             popoverProps,
             ...rest
         } = this.props;
@@ -134,6 +135,7 @@ class SearchInput extends Component {
         return (
             <div {...rest} className={className}>
                 <Popover
+                    style={popoverStyle}
                     {...popoverProps}
                     body={
                         (<Menu disableStyles={disableStyles}>
@@ -203,6 +205,7 @@ SearchInput.propTypes = {
     listProps: PropTypes.object,
     noSearchBtn: PropTypes.bool,
     placeholder: PropTypes.string,
+    popoverStyle: PropTypes.object,
     popoverProps: PropTypes.object,
     searchBtnProps: PropTypes.object,
     searchList: PropTypes.arrayOf(
@@ -216,11 +219,15 @@ SearchInput.propTypes = {
 };
 
 SearchInput.defaultProps = {
+    popoverStyle: {
+      width: '100%'
+    },
     onChange: () => { },
     onEnter: () => { }
 };
 
 SearchInput.propDescriptions = {
+    popoverStyle: 'Styles applied to child Popover',
     noSearchBtn: 'Set to **true** to render without a search button.',
     onEnter: 'Callback function when the user hits the <Enter> key.',
     searchBtnProps: 'Additional props to be spread to the search `<button>` element.',
