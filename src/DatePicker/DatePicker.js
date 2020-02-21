@@ -2,6 +2,7 @@ import Button from '../Button/Button';
 import Calendar from '../Calendar/Calendar';
 import FormInput from '../Forms/FormInput';
 import InputGroup from '../InputGroup/InputGroup';
+import Popover from '../Popover/Popover';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import withStyles from '../utils/WithStyles/WithStyles';
@@ -148,6 +149,8 @@ class DatePicker extends Component {
         const {
             blockedDates,
             buttonProps,
+            popoverStyle,
+            popoverProps,
             className,
             compact,
             disableAfterDate,
@@ -170,8 +173,10 @@ class DatePicker extends Component {
                 {...props}
                 className={className}
                 ref={component => (this.component = component)}>
-                <div className='fd-popover'>
-                    <div className='fd-popover__control'>
+
+                <Popover
+                    style={popoverStyle}
+                    control={(
                         <InputGroup compact={compact}>
                             <FormInput
                                 {...inputProps}
@@ -189,10 +194,8 @@ class DatePicker extends Component {
                                     option='light' />
                             </InputGroup.Addon>
                         </InputGroup>
-                    </div>
-                    <div
-                        aria-hidden={this.state.hidden}
-                        className='fd-popover__body fd-popover__body--right fd-popover__body--no-arrow'>
+                    )}
+                    body={(
                         <Calendar
                             blockedDates={blockedDates}
                             customDate={
@@ -211,9 +214,11 @@ class DatePicker extends Component {
                             enableRangeSelection={enableRangeSelection}
                             locale={locale}
                             onChange={this.updateDate}
-                            ref={this.calendarRef} />
-                    </div>
-                </div>
+                            ref={this.calendarRef}
+                        />
+                    )}
+                    {...popoverProps}
+                />
             </div>
         );
     }
@@ -224,6 +229,8 @@ DatePicker.displayName = 'DatePicker';
 DatePicker.propTypes = {
     ...Calendar.basePropTypes,
     buttonProps: PropTypes.object,
+    popoverStyle: PropTypes.object,
+    popoverProps: PropTypes.object,
     compact: PropTypes.bool,
     defaultValue: PropTypes.string,
     enableRangeSelection: PropTypes.bool,
@@ -233,6 +240,9 @@ DatePicker.propTypes = {
 };
 
 DatePicker.defaultProps = {
+    popoverStyle: {
+      width: '100%'
+    },
     defaultValue: '',
     locale: 'en',
     onBlur: () => {}
