@@ -13,10 +13,18 @@ class SearchInput extends Component {
         this.state = {
             isExpanded: false,
             searchExpanded: false,
-            value: '',
+            value: this.props.value,
             searchList: this.props.searchList,
             filteredResult: this.props.searchList
         };
+    }
+
+    static getDerivedStateFromProps = (props, state) => {
+      let derivedState = {
+        value: props.value
+      };
+
+      return derivedState;
     }
 
     onKeyPressHandler = event => {
@@ -214,6 +222,7 @@ SearchInput.propTypes = {
         })
     ),
     state: PropTypes.oneOf(FORM_STATES),
+    value: PropTypes.string,
     onChange: PropTypes.func,
     onEnter: PropTypes.func
 };
@@ -222,6 +231,7 @@ SearchInput.defaultProps = {
     popoverStyle: {
         width: '100%'
     },
+    value: '',
     onChange: () => { },
     onEnter: () => { }
 };
