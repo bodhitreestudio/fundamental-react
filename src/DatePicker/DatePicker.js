@@ -8,12 +8,12 @@ import Popover from '../Popover/Popover';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+const ISO_DATE_FORMAT = 'YYYY-MM-DD';
+
 class DatePicker extends Component {
     constructor(props) {
         super(props);
-        const ISO_DATE_FORMAT = 'YYYY-MM-DD';
-        const formattedDate = props.defaultValue.length > 0 ?
-            moment(props.defaultValue, ISO_DATE_FORMAT).format(this.getLocaleDateFormat()) : '';
+        const formattedDate = this.formatDate(props.defaultValue);
         this.state = {
             selectedDate: formattedDate.length === 0 ? null : moment(formattedDate, this.getLocaleDateFormat()),
             arrSelectedDates: [],
@@ -22,6 +22,14 @@ class DatePicker extends Component {
 
         this.calendarRef = React.createRef();
         this.popoverRef = React.createRef();
+    }
+
+    formatDate (value) {
+        if (!value) {
+            return value;
+        }
+        return moment(value, ISO_DATE_FORMAT)
+          .format(this.getLocaleDateFormat());
     }
 
     modifyDate = (e) => {
@@ -128,6 +136,17 @@ class DatePicker extends Component {
         });
     };
 
+    /**
+     * update state when props changed
+     */
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.defaultValue != this.props.defaultValue) {
+            this.setState({
+                formattedDate: this.formatDate(nextProps.defaultValue)
+            });
+        }
+    }
+
     render() {
         const {
             blockedDates,
@@ -135,6 +154,7 @@ class DatePicker extends Component {
             buttonProps,
             className,
             compact,
+            defaultValue,
             disableAfterDate,
             disableBeforeDate,
             disabledDates,
