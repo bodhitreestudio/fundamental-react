@@ -50,6 +50,7 @@ class Modal extends Component {
             headingLevel,
             footerProps,
             localizedText,
+            modalStyle,
             onClose,
             show,
             titleProps,
@@ -82,6 +83,7 @@ class Modal extends Component {
                     aria-label={title}
                     aria-modal='true'
                     className={modalClasses}
+                    style={modalStyle}
                     role='dialog'>
                     <div
                         {...contentProps}
@@ -138,6 +140,7 @@ Modal.propTypes = {
     localizedText: CustomPropTypes.i18n({
         closeButton: PropTypes.string
     }),
+    modalStyle: PropTypes.any,
     show: PropTypes.bool,
     titleProps: PropTypes.object,
     onClose: PropTypes.func
@@ -162,6 +165,7 @@ Modal.propDescriptions = {
     localizedTextShape: {
         closeButton: 'Aria-label for <button> element.'
     },
+    modalStyle: 'Custom styles applied to modal',
     onClose: 'Callback function passing event when close button is clicked.',
     show: 'Set to **true** to make the dialog visible.'
 };
