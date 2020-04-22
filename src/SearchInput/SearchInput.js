@@ -19,60 +19,88 @@ class SearchInput extends Component {
         };
     }
 
-    static getDerivedStateFromProps = (props, state) => {
-      let derivedState = {
-        value: props.value
-      };
+    shouldComponentUpdate(nextProps, nextState) {
 
-      return derivedState;
+      if (nextProps.value !== this.props.value) {
+        nextState.value = nextProps.value;
+      }
+
+      return true;
+
     }
 
     onKeyPressHandler = event => {
         if (event.key === 'Enter') {
-            this.props.onEnter(this.state.value);
         }
     };
 
     listItemClickHandler = (event, item) => {
-        item.callback ? item.callback() : null;
+        this.props.onItemClick && this.props.onItemClick(item);
+        this.setState({
+            value: item.text,
+            isExpanded: false
+        });
     };
 
-    onChangeHandler = event => {
-        let filteredResult;
-        if (this.state.searchList) {
-            filteredResult = this.state.searchList.filter(item =>
-                item.text.toLowerCase().startsWith(event.target.value.toLowerCase())
-            );
+    onSearchAsync (query) {
+        let promise; 
+        query = query || this.state.value;
+
+        if (!this.props.onSearchAsync) {
+            promise = new Promise((resolve, reject) => {
+                let filteredResult = this.props.searchList.filter(item =>
+                    item.text.toLowerCase().startsWith(query.toLowerCase())
+                );
+                resolve(filteredResult);
+            });
+        } else {
+            promise = this.props.onSearchAsync(query);
         }
+
+        return promise.then((filteredResult) => {
+            this.setState({
+                isExpanded: true,
+                filteredResult
+            });
+        });
+
+    }
+
+    _scheduleAsyncSearch (query) {
+
+      if (this.__searchTimer) {
+        //console.log('XXXXX clear last scheduled timer');
+        clearTimeout(this.__searchTimer);
+      }
+
+      //console.log('SSSSS schedule new timer');
+      this.__searchTimer = setTimeout(() => {
+        //console.log('√√√√√ TIMER: trigger search');
+        this.onSearchAsync(query);
+      }, 360);
+
+    }
+    onChangeHandler = event => {
+
+        let value = event.target.value;
+
         this.setState({
-            value: event.target.value,
+            value,
             isExpanded: true,
-            filteredResult: filteredResult
         }, () => {
-            this.props.onChange(event, filteredResult);
+            this._scheduleAsyncSearch(value);
         });
     };
 
     onClickHandler = () => {
         if (!this.state.isExpanded) {
-            document.addEventListener('click', this.onOutsideClickHandler, false);
-        } else {
-            document.removeEventListener('click', this.onOutsideClickHandler, false);
+            this.onSearchAsync();
         }
-        this.setState(prevState => ({
-            isExpanded: !prevState.isExpanded
-        }));
     };
 
     onSearchBtnHandler = () => {
-        this.setState(prevState => ({
-            searchExpanded: !prevState.searchExpanded
-        }));
-
-        if (this.state.searchExpanded && this.state.isExpanded) {
-            this.setState({
-                isExpanded: false
-            });
+        if (!this.state.isExpanded) {
+            this.onSearchAsync();
         }
     };
 
@@ -127,9 +155,7 @@ class SearchInput extends Component {
             disableStyles,
             placeholder,
             inShellbar,
-            onEnter,
             searchList,
-            onChange,
             noSearchBtn,
             compact,
             className,
@@ -139,6 +165,8 @@ class SearchInput extends Component {
             popoverStyle,
             popoverProps,
             state,
+            onSearchAsync,
+            onItemClick,
             ...rest
         } = this.props;
 
@@ -147,7 +175,7 @@ class SearchInput extends Component {
                 <Popover
                     style={popoverStyle}
                     {...popoverProps}
-                    body={
+                    body={this.state.isExpanded &&
                         (<Menu disableStyles={disableStyles}>
                             <Menu.List {...listProps}>
                                 {this.state.filteredResult && this.state.filteredResult.length > 0 ? (
@@ -156,10 +184,7 @@ class SearchInput extends Component {
                                             <Menu.Item
                                                 key={index}
                                                 onClick={(e) => this.listItemClickHandler(e, item)}>
-                                                <strong>{this.state.value}</strong>
-                                                {this.state.value && this.state.value.length
-                                                    ? item.text.substring(this.state.value.length)
-                                                    : item.text}
+                                                {item.text}
                                             </Menu.Item>
                                         );
                                     })
@@ -216,15 +241,12 @@ SearchInput.propTypes = {
     popoverStyle: PropTypes.object,
     searchBtnProps: PropTypes.object,
     searchList: PropTypes.arrayOf(
-        PropTypes.shape({
-            text: PropTypes.string.isRequired,
-            callback: PropTypes.func
-        })
+        PropTypes.object
     ),
     state: PropTypes.oneOf(FORM_STATES),
     value: PropTypes.string,
-    onChange: PropTypes.func,
-    onEnter: PropTypes.func
+    onSearchAsync: PropTypes.func,
+    onItemClick: PropTypes.func,
 };
 
 SearchInput.defaultProps = {
@@ -232,16 +254,15 @@ SearchInput.defaultProps = {
         width: '100%'
     },
     value: '',
-    onChange: () => { },
-    onEnter: () => { }
 };
 
 SearchInput.propDescriptions = {
     noSearchBtn: 'Set to **true** to render without a search button.',
-    onEnter: 'Callback function when the user hits the <Enter> key.',
     popoverStyle: 'Styles applied to child Popover',
     searchBtnProps: 'Additional props to be spread to the search `<button>` element.',
-    searchList: 'Collection of items to display in the dropdown list.'
+    searchList: 'Collection of items to display in the dropdown list.',
+    onSearchAsync: 'Function to return the search data for user input',
+    onItemClick: 'Function to call on item click',
 };
 
 export default SearchInput;
