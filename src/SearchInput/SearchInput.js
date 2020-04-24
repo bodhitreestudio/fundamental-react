@@ -43,6 +43,9 @@ class SearchInput extends Component {
     };
 
     onSearchAsync (query) {
+
+        this.setState({ loading: true });
+
         let promise; 
         query = query || this.state.value;
 
@@ -57,12 +60,16 @@ class SearchInput extends Component {
             promise = this.props.onSearchAsync(query);
         }
 
-        return promise.then((filteredResult) => {
-            this.setState({
-                isExpanded: true,
-                filteredResult
+        return promise
+            .then((filteredResult) => {
+                this.setState({
+                    isExpanded: true,
+                    filteredResult
+                });
+            })
+            .finally(() => {
+                this.setState({ loading: false });
             });
-        });
 
     }
 
@@ -162,6 +169,7 @@ class SearchInput extends Component {
             inputProps,
             listProps,
             searchBtnProps,
+            loadingIndicator,
             popoverStyle,
             popoverProps,
             state,
@@ -213,8 +221,11 @@ class SearchInput extends Component {
                                     <Button {...searchBtnProps}
                                         disableStyles={disableStyles}
                                         glyph='search'
+                                        loading={this.state.loading}
                                         onClick={() => this.onClickHandler()}
-                                        option='light' />
+                                        option='light' >
+                                        {this.state.loading && loadingIndicator}
+                                    </Button>
                                 </InputGroup.Addon>
                             )}
                         </InputGroup>
@@ -240,6 +251,7 @@ SearchInput.propTypes = {
     popoverProps: PropTypes.object,
     popoverStyle: PropTypes.object,
     searchBtnProps: PropTypes.object,
+    loadingIndicator: PropTypes.object,
     searchList: PropTypes.arrayOf(
         PropTypes.object
     ),

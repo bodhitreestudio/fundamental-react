@@ -15,6 +15,7 @@ const Button = React.forwardRef(({
     onClick,
     children,
     className,
+    loading,
     ...props
 }, ref) => {
 
@@ -32,7 +33,7 @@ const Button = React.forwardRef(({
             [`fd-button--${option}`]: !!option,
             [`fd-button--${type}`]: !!type,
             'fd-button--compact': compact,
-            [`sap-icon--${glyph}`]: !!glyph,
+            [`sap-icon--${glyph}`]: (loading !== true && !!glyph),
             'is-selected': selected,
             'is-disabled': disabled
         },
@@ -61,6 +62,7 @@ Button.propTypes = {
     selected: PropTypes.bool,
     type: PropTypes.oneOf(BUTTON_TYPES),
     typeAttr: PropTypes.string,
+    loading: PropTypes.bool,
     onClick: PropTypes.func
 };
 
